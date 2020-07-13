@@ -1,3 +1,4 @@
+// 页面之间的切换还是要用路由来进行操作
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 
@@ -6,6 +7,7 @@ const Home = () => import('../views/home/Home')
 const Category = () => import('../views/category/Category')
 const Cart = () => import('../views/cart/Cart')
 const Profile = () => import('../views/profile/Profile')
+const Detail = () => import('../views/detail/Detail')
 
 
 // 安装插件
@@ -33,6 +35,10 @@ const routes = [//配置对应的映射关系
     path: '/profile',
     component: Profile
   },
+  {
+    path: '/detail/:iid',
+    component: Detail
+  }
 ]
 
 const router = new VueRouter({

@@ -1,6 +1,7 @@
 <template>
-  <div class="goods-item">
-    <img :src="goodsItem.show.img" alt="">
+  <div class="goods-item" @click="itemClick">
+    <img :src="showImage" alt="" @load="imageLoad">
+    <!-- @load='方法' vue中用来监听加载是否完成的 -->
     <div class="goods-info">
       <p>{{goodsItem.title}}</p>
       <span class="price">{{goodsItem.price}}</span>
@@ -24,7 +25,30 @@ export default {
         return {}
       }
     }
-  }
+  },
+  computed: {
+    showImage() {
+      return this.goodsItem.image || this.goodsItem.show.img
+    }
+  },
+  methods: {
+    imageLoad() {
+      // 由于home和detail页面都用了imageLoad 为了让detail页面加载 home页面不刷新 操作如下
+      // 法一：
+      // if (this.$router.path.indexOf('/home')) {
+      //   this.$bus.$emit('itemImageLoad')
+      // } else if (this.$router.path.indexOf('/detail')) {
+      //    this.$bus.$emit('detailItemImgLoad')
+      // }
+
+      // 法二：
+      this.$bus.$emit('itemImageLoad')
+    },
+    itemClick() {
+      this.$router.push('/detail/' + this.goodsItem.iid)
+      // console.log(this.goodsItem.iid)
+    }
+  },
 };
 </script>
  
