@@ -1,4 +1,8 @@
 <template>
+  <!-- 只有在有值的情况下 才会渲染下面的东西 如果没有请求过来数据的话 是拿不到的 
+    而在created中才开始请求数据 这是异步操作 等执行mounted时 数据还不一定已经请求过来了
+    也就是说可能会出现没拿到数据的情况 等于下面都是不存在的 
+  -->
   <div class="param-info" v-if="Object.keys(paramInfo).length !== 0">
     <table v-for="(table, index) in paramInfo.sizes"
            class="info-size" :key="index">

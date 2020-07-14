@@ -38,10 +38,9 @@ import TabControl from "components/content/tabControl/TabControl";
 import GoodsList from "components/content/goods/GoodsList";
 import GoodsListItem from "components/content/goods/GoodsListItem";
 import Scroll from "components/common/scroll/Scroll";
-import BackTop from 'components/content/backTop/BackTop'
 // 方法&额外数据
 import {debounce} from 'common/utils'
-import {itemListenerMixin} from 'common/mixin'
+import {itemListenerMixin, backTopMixin} from 'common/mixin'
 import { getHomeMultidata, getHomeGoods } from "network/home";
 
 // 之所以用{}的形式来写 是因为home.js 没用export default的形式导出
@@ -58,9 +57,8 @@ export default {
     GoodsList,
     GoodsListItem,
     Scroll,
-    BackTop
   },
-  mixins:[itemListenerMixin],
+  mixins:[itemListenerMixin, backTopMixin],
   // 搞一个data用来在函数执行完毕之前存储请求过来的数据 即下面的res 防止其销毁
   data() {
     return {
@@ -73,7 +71,6 @@ export default {
         sell: { page: 0, list: [] }
       },
       currentType: "pop",
-      isShowBackTop: false,
       tabOffsetTop: 0,
       isTabFixed:false,
       saveY: 0,
@@ -155,11 +152,6 @@ export default {
       }
       this.$refs.tabControl1.currentIndex = index;
       this.$refs.tabControl2.currentIndex = index;
-    },
-    backClick() {
-      // scrollTo 前面两个是xy坐标 后面的是执行时间
-      this.$refs.scroll.scrollTo(0, 0)
-      // console.log('backtop')
     },
     contentScroll(position) {
       // 1.判断backtop是否显示
