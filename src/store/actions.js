@@ -1,9 +1,11 @@
 import {ADD_COUNTER, ADD_TO_CART} from './mutation-types'
+// import { resolve, reject } from 'core-js/fn/promise'
 
 export default {
   // dispatch的第一个参数是context 
   addCart(context, payload) {
-    // payload新添加的商品
+    return new Promise((resolve, reject) => {
+      // payload新添加的商品
     // 法一
     // let oldProduct = null
     // for (let item of state. ) {
@@ -27,11 +29,14 @@ export default {
     if (oldProduct) {
       // oldProduct.count += 1
       context.commit(ADD_COUNTER, oldProduct)
+      resolve('当前商品数量+1')
     } else {
       payload.count = 1
       // 添加新品
       // context.state.cartList.push(payload)
       context.commit(ADD_TO_CART, payload)
+      resolve('已添加新商品')
     }
+    })
   }
 }

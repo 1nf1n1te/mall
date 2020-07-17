@@ -14,7 +14,14 @@
       <div class="item-desc">商品描述: {{itemInfo.desc}}</div>
       <div class="info-bottom">
         <div class="item-price left">¥{{itemInfo.value}}</div>
-        <div class="item-count right">x{{itemInfo.count}}</div>
+
+        <div class="item-count right">
+          <button @click="add()">+</button>
+          {{itemInfo.count}}
+          <button @click="subtract()">-</button>
+          <button class="item-del" @click="itemDel()">删除</button>
+        </div>
+
       </div>
     </div>
   </div>
@@ -34,8 +41,19 @@
     methods: {
       checkClick() {
         this.itemInfo.checked = !this.itemInfo.checked
+      },
+      add() {
+        this.itemInfo.count++
+      },
+      subtract() { 
+        if(this.itemInfo.count >= 1){
+          this.itemInfo.count--
+        }
+      },
+      itemDel() {
+        
       }
-    }
+    },
   }
 </script>
 
@@ -94,8 +112,10 @@
     left: 10px;
     right: 10px;
   }
-
   .info-bottom .item-price {
     color: orangered;
   }
+  .item-del{
+    margin-left: 10px;
+  } 
 </style>

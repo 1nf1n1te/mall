@@ -1,10 +1,10 @@
 <template>
   <div id="detail">
     <!-- 比较复杂的都放到childComps里面做 -->
-    <detail-nav-bar class="detail-nav" @titleClick="titleClick" ref="nav"/>
+    <detail-nav-bar class="detail-nav" @titleClick="titleClick" ref="nav" />
     <!-- probe-type默认是0 0的时候不派发事件 所以没有生效 要想生效加上probe-type='3'
       但是这样传是不对的会当做是字符串传过去 所以前面要加上: 才能真正的传number类型
-     -->
+    -->
     <scroll class="content" ref="scroll" :probe-type="3" @scroll="contentScroll">
       <!-- 属性：topImages 前面传入值的时候：top-images 前面-后面驼峰
         之所以前面要用-来链接 是因为传入值不区分大小写 你写成topImages可能会被识别为给topimages传 但是没有topimages就会报错
@@ -24,8 +24,9 @@
       <detail-comment-info ref="comment" :comment-info="commentInfo" />
       <goods-list ref="recommend" :goods="recommends" />
     </scroll>
-    <detail-bottom-bar @addCart="addToCart"/>
+    <detail-bottom-bar @addCart="addToCart" />
     <back-top @click.native="backClick" v-show="isShowBackTop" />
+    <!-- <toast :message="message" :show="show"/> -->
   </div>
 </template>
 
@@ -37,14 +38,22 @@ import DetailShopInfo from "./childComps/DetailShopInfo";
 import DetailGoodsInfo from "./childComps/DetailGoodsInfo";
 import DetailParamInfo from "./childComps/DetailParamInfo";
 import DetailCommentInfo from "./childComps/DetailCommentInfo";
-import DetailBottomBar from './childComps/DetailBottomBar';
+import DetailBottomBar from "./childComps/DetailBottomBar";
 
 import Scroll from "components/common/scroll/Scroll";
 import GoodsList from "components/content/goods/GoodsList";
+// import Toast from 'components/common/toast/Toast'
 
-import {getDetail, Goods, Shop, GoodsParam, getRecommend} from "network/detail";
+import {
+  getDetail,
+  Goods,
+  Shop,
+  GoodsParam,
+  getRecommend
+} from "network/detail";
 import { debounce } from "common/utils";
-import { itemListenerMixin , backTopMixin} from "common/mixin";
+import { itemListenerMixin, backTopMixin } from "common/mixin";
+import { mapActions } from "vuex";
 
 export default {
   name: "Detail",
@@ -57,12 +66,13 @@ export default {
     DetailParamInfo,
     DetailCommentInfo,
     DetailBottomBar,
+    // Toast,
 
     Scroll,
-    GoodsList,
+    GoodsList
   },
   mixins: [itemListenerMixin, backTopMixin],
-  
+
   data() {
     return {
       iid: null,
@@ -75,7 +85,9 @@ export default {
       recommends: [],
       themeTopYs: [],
       getThemeTopY: null,
-      currentIndex: 0,
+      currentIndex: 0
+      // message: '',
+      // show:false
     };
   },
   created() {
@@ -151,11 +163,12 @@ export default {
       // console.log(this.$refs.params.$el.offsetTop) undefined
       this.themeTopYs.push(this.$refs.comment.$el.offsetTop - 44);
       this.themeTopYs.push(this.$refs.recommend.$el.offsetTop - 44);
-      this.themeTopYs.push(Number.MAX_VALUE)
+      this.themeTopYs.push(Number.MAX_VALUE);
       // console.log(this.themeTopYs);
-    },200)
+    }, 200);
   },
   methods: {
+    ...mapActions(["addCart"]),
     imageLoad() {
       this.$refs.scroll.refresh();
       // 测试四：值对了 放在图片加载完刷新之后 就能够完美获取到 但是过于频繁换到上面
@@ -168,7 +181,7 @@ export default {
       // console.log(this.themeTopYs);
 
       // 注意这里要调一下
-      this.getThemeTopY()
+      this.getThemeTopY();
     },
     titleClick(index) {
       // console.log(index)
@@ -177,45 +190,66 @@ export default {
     contentScroll(position) {
       // console.log(position)
       // 1.获取y值
-      const positionY = -position.y
+      const positionY = -position.y;
       // 2.positionY与主题中的值进行对比
-      let length = this.themeTopYs.length
-      for(let i = 0; i < length - 1; i++){
+      let length = this.themeTopYs.length;
+      for (let i = 0; i < length - 1; i++) {
         // 但是不能如下写 原因如下
         // 1.上面如果用的(let i in themeTopYs)那么这里的i是字符串类型 i+1会变成 i1 =>法一：parseInt(i) 法二：i * 1
         // 2.i如果到3的话 i+1就越界了 取不到的 故注释之
         // if( positionY > this.themeTopYs[i] && positionY < this.themeTopYs[i+1]) { }
-        
+
         // 这里先判断是否一致 一致就不需要赋值了 不一致再给最新的i  但是如下的性能会差一点 故在上面加上MaxValue
         // if(this.currentIndex !== i && ((i < length - 1 && positionY >= this.themeTopYs[i] && positionY < this.themeTopYs[i+1]) || (i === length - 1 && positionY >= this.themeTopYs[i]))){
-        if(this.currentIndex !== i && ((i < length - 1 && positionY >= this.themeTopYs[i] && positionY < this.themeTopYs[i+1]) )){
+        if (
+          this.currentIndex !== i &&
+          i < length - 1 &&
+            positionY >= this.themeTopYs[i] &&
+            positionY < this.themeTopYs[i + 1]
+        ) {
           // console.log(i)
-          this.currentIndex = i
-          this.$refs.nav.currentIndex = this.currentIndex
+          this.currentIndex = i;
+          this.$refs.nav.currentIndex = this.currentIndex;
         }
       }
 
       // 3.是否显示回到顶部
-      this.isShowBackTop = (-position.y) > 1000
+      this.isShowBackTop = -position.y > 1000;
     },
     addToCart() {
       // 1.获取购物车需要展示的商品信息 并添加
-      const product = {}
-      product.image = this.topImages[0]
-      product.title = this.goods.title
-      product.desc = this.goods.desc
-      product.value = this.goods.realPrice
-      product.iid = this.iid
-      
+      const product = {};
+      product.image = this.topImages[0];
+      product.title = this.goods.title;
+      product.desc = this.goods.desc;
+      product.value = this.goods.realPrice;
+      product.iid = this.iid;
 
       // 2.将商品添加到购物车里面
       // 像这种购物车可以用Vuex来管理
       // 注意修改任何state里面的内容都最好还是通过mutation来操作 最好不要用下面这行写法
       // this.$store.cartList.push(product)
       // this.$store.commit('addCart',product)
-      this.$store.dispatch('addCart',product)
-    }
 
+      // 1.返回promise 2.mapActions
+      this.addCart(product).then(res => {
+        //用了mapActions之后 这个this.addCart会调actions的
+        // 过于麻烦 放弃此法转向封装
+        // this.show = true;
+        // this.message = res;
+        // setTimeout(() => {
+        //   this.show = false
+        //   this.message = ''
+        // },3000)
+        // console.log(this.$toast);
+        this.$toast.show(res, 2000);
+      });
+
+      // this.$store.dispatch('addCart',product).then(res => {
+      //   console.log(res)
+      // })
+      // dispatch里面可以做promise操作
+    }
   },
   mounted() {
     // 测试一：值不对
